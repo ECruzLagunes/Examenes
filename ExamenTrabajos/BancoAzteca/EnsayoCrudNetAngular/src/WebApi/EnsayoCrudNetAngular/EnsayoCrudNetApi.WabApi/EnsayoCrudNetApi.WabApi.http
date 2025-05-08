@@ -1,0 +1,6 @@
+@EnsayoCrudNetApi.WabApi_HostAddress = http://localhost:5041
+
+GET {{EnsayoCrudNetApi.WabApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
