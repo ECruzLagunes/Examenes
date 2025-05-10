@@ -1,17 +1,18 @@
+using EnsayoCrudNetAngular.Application.Interface;
+using EnsayoCrudNetAngular.Application.Services;
 using EnsayoCrudNetAngular.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Application layer
+builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 
+builder.Services.AddInfrastructure(builder.Configuration);
+
+// Swagger, Controllers, etc.
 builder.Services.AddControllers();
-
-builder.Services.AddInfrastructure();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
 

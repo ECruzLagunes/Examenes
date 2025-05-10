@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EnsayoCrudNetAngular.Domain\EnsayoCrudNetAngular.Domain.csproj" />
+    <ProjectReference Include="..\EnsayoCrudNetAngular.Infracstructure\EnsayoCrudNetAngular.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
