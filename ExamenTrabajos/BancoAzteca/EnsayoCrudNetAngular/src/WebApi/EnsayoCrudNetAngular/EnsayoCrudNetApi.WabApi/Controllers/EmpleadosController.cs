@@ -2,9 +2,7 @@
 using EnsayoCrudNetAngular.Application.Interface;
 using EnsayoCrudNetAngular.Domain.Entities;
 using EnsayoCrudNetAngular.Domain.Servicios;
-using EnsayoCrudNetAngular.Infrastructure.DataAccess;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.Eventing.Reader;
 
 namespace EnsayoCrudNetApi.WebApi.Controllers
 {
@@ -77,39 +75,65 @@ namespace EnsayoCrudNetApi.WebApi.Controllers
             return Ok(response);
         }
 
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> Get(int id)
-        //{
-        //    var result = await _data.ObtenerEmpleadoPorIdAsync(id);
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Empleado empleado)
+        {
+            var response = new ServiceResponse();
 
-        //    switch (result.codigo)                
-        //    { 
-        //        case 0:
-        //    }
+            var (idGenerado, codigo, mensaje) = await _empleadoService.InsertarEmpleadoAsync(empleado);
 
-        //    return Ok(result);
-        //}
+            response.Codigo = codigo switch
+            {
+                0 => 200,
+                1 => 400,
+                -1 => 500,
+                _ => 500
+            };
+            response.Mensaje = mensaje;
+            response.Resultado = idGenerado;
 
-        //[HttpPost]
-        //public async Task<IActionResult> Post([FromBody] EmpleadoDto dto)
-        //{
-        //    var id = await _data.InsertarAsync(dto);
-        //    return CreatedAtAction(nameof(Get), new { id }, dto);
-        //}
+            return Ok(response);
+        }
 
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> Put(int id, [FromBody] EmpleadoDto dto)
-        //{
-        //    dto.IdEmpleado = id;
-        //    var success = await _data.EditarAsync(dto);
-        //    return success ? NoContent() : NotFound();
-        //}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Editar(int id, [FromBody] Empleado empleado)
+        {
+            var response = new ServiceResponse();
+            empleado.IdEmpleado = id;
 
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    var success = await _data.EliminarAsync(id);
-        //    return success ? NoContent() : NotFound();
-        //}
+            var (codigo, mensaje) = await _empleadoService.EditarEmpleadoAsync(empleado);
+
+            response.Codigo = codigo switch
+            {
+                0 => 400,
+                1 => 200,
+                -1 => 500,
+                _ => 500
+            };
+            response.Mensaje = mensaje;
+
+            return Ok(response);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var response = new ServiceResponse();
+
+            var (codigo, mensaje, idEliminado) = await _empleadoService.EliminarEmpleadoAsync(id);
+
+            response.Codigo = codigo switch
+            {
+                1 => 200,
+                0 => 404,
+                -1 => 500,
+                _ => 400
+            };
+
+            response.Mensaje = mensaje;
+            response.Resultado = idEliminado;
+
+            return Ok(response);
+        }
     }
 }

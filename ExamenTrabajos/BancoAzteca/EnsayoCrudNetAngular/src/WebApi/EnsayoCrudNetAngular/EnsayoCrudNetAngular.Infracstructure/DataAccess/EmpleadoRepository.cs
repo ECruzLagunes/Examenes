@@ -85,56 +85,142 @@
             return empleado;
         }
 
-        //public async Task<int> InsertarAsync(EmpleadoDto dto)
-        //{
-        //    using var conn = new SqlConnection(_connectionString);
-        //    using var cmd = new SqlCommand("Usp_InsertaEmpleado", conn)
-        //    {
-        //        CommandType = CommandType.StoredProcedure
-        //    };
+        public async Task<(int idGenerado, string mensaje)> InsertarEmpleadoAsync(Empleado empleado)
+        {
+            int idGenerado = 0;
+            string mensaje = "";
 
-        //    cmd.Parameters.AddWithValue("@NombreCompleto", dto.NombreCompleto);
-        //    cmd.Parameters.AddWithValue("@Correo", dto.Correo);
-        //    cmd.Parameters.AddWithValue("@Sueldo", dto.Sueldo);
-        //    cmd.Parameters.AddWithValue("@FechaContrato", dto.FechaContrato);
+            using var connection = new SqlConnection(_connectionString);
+            try
+            {
+                using var command = new SqlCommand("Usp_InsertaEmpleado", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
-        //    await conn.OpenAsync();
-        //    var result = await cmd.ExecuteScalarAsync();
-        //    return Convert.ToInt32(result);
-        //}
+                command.Parameters.AddWithValue("@NombreCompleto", empleado.NombreCompleto);
+                command.Parameters.AddWithValue("@Correo", empleado.Correo);
+                command.Parameters.AddWithValue("@Sueldo", empleado.Sueldo);
+                command.Parameters.AddWithValue("@FechaContrato", empleado.FechaContrato);
 
-        //public async Task<bool> EditarAsync(EmpleadoDto dto)
-        //{
-        //    using var conn = new SqlConnection(_connectionString);
-        //    using var cmd = new SqlCommand("Usp_EditarEmpleado", conn)
-        //    {
-        //        CommandType = CommandType.StoredProcedure
-        //    };
+                var idGeneradoParam = new SqlParameter("@IdGenerado", SqlDbType.Int) { Direction = ParameterDirection.Output };
+                var mensajeParam = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500) { Direction = ParameterDirection.Output };
 
-        //    cmd.Parameters.AddWithValue("@IdEmpleado", dto.IdEmpleado);
-        //    cmd.Parameters.AddWithValue("@NombreCompleto", dto.NombreCompleto);
-        //    cmd.Parameters.AddWithValue("@Correo", dto.Correo);
-        //    cmd.Parameters.AddWithValue("@Sueldo", dto.Sueldo);
-        //    cmd.Parameters.AddWithValue("@FechaContrato", dto.FechaContrato);
+                command.Parameters.Add(idGeneradoParam);
+                command.Parameters.Add(mensajeParam);
 
-        //    await conn.OpenAsync();
-        //    return await cmd.ExecuteNonQueryAsync() > 0;
-        //}
+                await connection.OpenAsync();
+                await command.ExecuteNonQueryAsync();
 
-        //public async Task<bool> EliminarAsync(int id)
-        //{
-        //    using var conn = new SqlConnection(_connectionString);
-        //    using var cmd = new SqlCommand("Usp_EliminarEmpleado", conn)
-        //    {
-        //        CommandType = CommandType.StoredProcedure
-        //    };
+                idGenerado = (int)(idGeneradoParam.Value ?? 0);
+                mensaje = mensajeParam.Value?.ToString() ?? "Error desconocido";
+            }
+            catch (Exception ex)
+            {
+                idGenerado = 0;
+                mensaje = $"Error inesperado: {ex.Message}";
+            }
+            finally
+            {
+                connection.Close();
+            }
 
-        //    cmd.Parameters.AddWithValue("@IdEmpleado", id);
+            return (idGenerado, mensaje);
+        }
 
-        //    await conn.OpenAsync();
-        //    return await cmd.ExecuteNonQueryAsync() > 0;
-        //}
+        public async Task<(int codigo, string mensaje)> EditarEmpleadoAsync(Empleado empleado)
+        {
+            int resultado = 0;
+            string mensaje = string.Empty;
+
+            using var connection = new SqlConnection(_connectionString);
+            try
+            {
+                using var command = new SqlCommand("Usp_EditaEmpleado", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                command.Parameters.AddWithValue("@IdEmpleado", empleado.IdEmpleado);
+                command.Parameters.AddWithValue("@NombreCompleto", empleado.NombreCompleto);
+                command.Parameters.AddWithValue("@Correo", empleado.Correo);
+                command.Parameters.AddWithValue("@Sueldo", empleado.Sueldo);
+                command.Parameters.AddWithValue("@FechaContrato", empleado.FechaContrato);
+
+                var resultadoParam = new SqlParameter("@Resultado", SqlDbType.Int)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                command.Parameters.Add(resultadoParam);
+
+                var mensajeParam = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                command.Parameters.Add(mensajeParam);
+
+                await connection.OpenAsync();
+                await command.ExecuteNonQueryAsync();
+
+                resultado = (int)(resultadoParam.Value ?? -1);
+                mensaje = mensajeParam.Value?.ToString() ?? "Error desconocido";
+            }
+            catch (Exception e)
+            {
+                resultado = -1;
+                mensaje = $"Error inesperado: {e.Message}";
+            }
+            finally
+            {
+                await connection.CloseAsync();
+            }
+
+            return (resultado, mensaje);
+        }
+
+        public async Task<(int idEliminado, int resultado, string mensaje)> EliminarEmpleadoAsync(int idEmpleado)
+        {
+            int resultado = 0;
+            int idEliminado = 0;
+            string mensaje = string.Empty;
+
+            using var connection = new SqlConnection(_connectionString);
+
+            try
+            {
+                using var command = new SqlCommand("Usp_EliminaEmpleado", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                command.Parameters.Add(new SqlParameter("@IdEmpleado", SqlDbType.Int) { Value = idEmpleado });
+
+                var resultadoParam = new SqlParameter("@Resultado", SqlDbType.Int) { Direction = ParameterDirection.Output };
+                var mensajeParam = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500) { Direction = ParameterDirection.Output };
+                var idEliminadoParam = new SqlParameter("@IdEmpleadoEliminado", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+                command.Parameters.Add(resultadoParam);
+                command.Parameters.Add(mensajeParam);
+                command.Parameters.Add(idEliminadoParam);
+
+                await connection.OpenAsync();
+                await command.ExecuteNonQueryAsync();
+
+                resultado = (int)(resultadoParam.Value ?? 0);
+                mensaje = mensajeParam.Value?.ToString() ?? "Error desconocido.";
+                idEliminado = (int)(idEliminadoParam.Value ?? 0);
+            }
+            catch (Exception ex)
+            {
+                resultado = -1;
+                mensaje = ex.Message;
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return (idEliminado, resultado, mensaje);
+        }
     }
-
-
 }
