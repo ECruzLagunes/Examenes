@@ -1,7 +1,7 @@
 --Data Definition Lenguage DDL
 Create Table Empleado(
 	IdEmpleado		INT PRIMARY KEY IDENTITY,
-	NombreCompleto	VARCHAR,
+	NombreCompleto	VARCHAR(500),
 	Correo			VARCHAR(50),
 	Sueldo			DECIMAL(10,2),
 	FechaContrato	DATE

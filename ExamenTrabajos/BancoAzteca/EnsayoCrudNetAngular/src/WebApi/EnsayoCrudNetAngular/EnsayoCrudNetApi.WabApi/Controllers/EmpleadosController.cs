@@ -1,7 +1,9 @@
 ﻿
 using EnsayoCrudNetAngular.Application.Interface;
+using EnsayoCrudNetAngular.Application.Services;
 using EnsayoCrudNetAngular.Domain.Entities;
 using EnsayoCrudNetAngular.Domain.Servicios;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EnsayoCrudNetApi.WebApi.Controllers
@@ -11,18 +13,42 @@ namespace EnsayoCrudNetApi.WebApi.Controllers
     public class EmpleadosController : ControllerBase
     {
         private readonly IEmpleadoService _empleadoService;
+        private readonly IJwtService _jwtService;
+        private readonly IPokemonService _pokemonService;
 
-        public EmpleadosController(IEmpleadoService empleadoService)
+        public EmpleadosController(IEmpleadoService empleadoService, IJwtService jwtService, IPokemonService pokemonService)
         {
-            _empleadoService = empleadoService;
+            _empleadoService = empleadoService; 
+            _jwtService = jwtService; 
+            _pokemonService = pokemonService;
         }
 
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginRequest request)
+        {
+            if (request.Usuario == "admin" && request.Password == "1234")
+            {
+                var token = _jwtService.GenerateToken("1", "Admin");
+
+                return Ok(new
+                {
+                    token
+                });
+            }
+
+            return Unauthorized("Usuario o contraseña incorrectos");
+        }
+
+        //[Authorize]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
             var response = new ServiceResponse();
 
             var (lista, resultado, mensaje) = await _empleadoService.ObtenerListaEmpleadosAsync();
+            var a = await _pokemonService.FiltrarPorNombreConIdAsync("on");
+
+            var (detalle, cod, msg) = await _pokemonService.ObtenerPokemonPorNombreAsync("pikachu");
 
             if (resultado == 0)
             {
@@ -46,6 +72,7 @@ namespace EnsayoCrudNetApi.WebApi.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -75,6 +102,7 @@ namespace EnsayoCrudNetApi.WebApi.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Empleado empleado)
         {
@@ -95,6 +123,7 @@ namespace EnsayoCrudNetApi.WebApi.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Editar(int id, [FromBody] Empleado empleado)
         {
@@ -115,6 +144,7 @@ namespace EnsayoCrudNetApi.WebApi.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

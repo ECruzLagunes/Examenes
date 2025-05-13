@@ -1,7 +1,8 @@
-using EnsayoCrudNetAngular.Application.Interface;
-using EnsayoCrudNetAngular.Application.Services;
-using EnsayoCrudNetAngular.Domain.Entities;
-using EnsayoCrudNetAngular.Infrastructure;
+
+using CrudApi.Application.Interface;
+using CrudApi.Application.Services;
+using CrudApi.Domain.Entities;
+using CrudApi.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -9,7 +10,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddHttpClient<IPokemonService, PokemonService>();
 
@@ -94,7 +95,7 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mi API v1");
-    c.RoutePrefix = string.Empty; 
+    c.RoutePrefix = string.Empty;
 });
 
 // Configure the HTTP request pipeline.
