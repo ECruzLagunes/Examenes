@@ -1,43 +1,78 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using EscuelaMusica.Domain.Entities;
+using ApiResponse = EscuelaMusica.Api.Utils.ApiResponse;
 using EscuelaMusica.Application.Interface;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProfesoresController : ControllerBase
+[Authorize]
+public sealed class ProfesoresController : ControllerBase
 {
     private readonly IProfesorService _svc;
     public ProfesoresController(IProfesorService svc) => _svc = svc;
 
-    [HttpGet] public Task<IReadOnlyList<Profesor>> Get(CancellationToken ct) => _svc.ListarAsync(ct);
+    [HttpGet]
+    public async Task<IActionResult> GetAll(CancellationToken ct)
+    {
+        try { return ApiResponse.FromData(await _svc.ListarAsync(ct)); }
+        catch (Exception ex) { return ApiResponse.FromException(ex); }
+    }
+
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Profesor>> Get(int id, CancellationToken ct)
-    { 
-        var p = await _svc.ObtenerAsync(id, ct); 
-        return p is null ? NotFound() : Ok(p); 
+    public async Task<IActionResult> Get(int id, CancellationToken ct)
+    {
+        try
+        {
+            var p = await _svc.ObtenerAsync(id, ct);
+            return p is null ? ApiResponse.FromResult(new(1, "No encontrado", null))
+                             : ApiResponse.FromData(p);
+        }
+        catch (Exception ex) 
+        { 
+            return ApiResponse.FromException(ex); 
+        }
     }
 
     [HttpPost]
-    public async Task<ActionResult> Post(Profesor dto, CancellationToken ct)
-    { 
-        var r = await _svc.CrearAsync(dto, ct); 
-        return r.Codigo == 0 ? CreatedAtAction(nameof(Get), new { id = r.Id }, dto) : BadRequest(r); 
+    public async Task<IActionResult> Create(Profesor dto, CancellationToken ct)
+    {
+        try 
+        { 
+            return ApiResponse.FromResult(await _svc.CrearAsync(dto, ct)); 
+        }
+        catch (Exception ex) 
+        { 
+            return ApiResponse.FromException(ex); 
+        }
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Put(int id, Profesor dto, CancellationToken ct)
-    { 
-        if (id != dto.IdProfesor) 
-            return BadRequest(); 
-        
-        var r = await _svc.EditarAsync(dto, ct); 
-        return r.Codigo == 0 ? NoContent() : NotFound(r); 
+    public async Task<IActionResult> Update(int id, Profesor dto, CancellationToken ct)
+    {
+        try
+        {
+            if (id != dto.IdProfesor) 
+                return ApiResponse.FromResult(new(1, "Id distinto", null));
+
+            return ApiResponse.FromResult(await _svc.EditarAsync(dto, ct));
+        }
+        catch (Exception ex) 
+        { 
+            return ApiResponse.FromException(ex); 
+        }
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
-    { 
-        var r = await _svc.EliminarAsync(id, ct); 
-        return r.Codigo == 0 ? NoContent() : NotFound(r); 
+    {
+        try 
+        { 
+            return ApiResponse.FromResult(await _svc.EliminarAsync(id, ct)); 
+        }
+        catch (Exception ex)
+        { 
+            return ApiResponse.FromException(ex);
+        }
     }
 }

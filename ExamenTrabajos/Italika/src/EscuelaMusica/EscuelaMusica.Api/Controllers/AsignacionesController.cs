@@ -4,7 +4,6 @@ using EscuelaMusica.Domain.Entities;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public sealed class AsignacionesController : ControllerBase
 {
     private readonly IAsignacionService _svc;

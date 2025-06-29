@@ -12,7 +12,7 @@ internal sealed class ProfesorRepository : BaseRepository, IProfesorRepository
     public ProfesorRepository(IConfiguration cfg) : base(cfg) { }
 
     public Task<OperationResult> InsertarAsync(Profesor p, CancellationToken ct)
-        => ExecCrudAsync("dbo.SP_Profesores_CRUD", cmd =>
+        => ExecCrudAsync("dbo.SpProfesores", cmd =>
         {
             cmd.Parameters.AddWithValue("@Accion", "I");
             cmd.Parameters.AddWithValue("@CodigoProfesor", p.CodigoProfesor);
@@ -23,7 +23,7 @@ internal sealed class ProfesorRepository : BaseRepository, IProfesorRepository
         }, ct);
 
     public Task<OperationResult> ActualizarAsync(Profesor p, CancellationToken ct)
-        => ExecCrudAsync("dbo.SP_Profesores_CRUD", cmd =>
+        => ExecCrudAsync("dbo.SpProfesores", cmd =>
         {
             cmd.Parameters.AddWithValue("@Accion", "U");
             cmd.Parameters.AddWithValue("@IdProfesor", p.IdProfesor);
@@ -34,7 +34,7 @@ internal sealed class ProfesorRepository : BaseRepository, IProfesorRepository
         }, ct);
 
     public Task<OperationResult> EliminarAsync(int id, CancellationToken ct)
-        => ExecCrudAsync("dbo.SP_Profesores_CRUD", cmd =>
+        => ExecCrudAsync("dbo.SpProfesores", cmd =>
         {
             cmd.Parameters.AddWithValue("@Accion", "D");
             cmd.Parameters.AddWithValue("@IdProfesor", id);
@@ -46,7 +46,7 @@ internal sealed class ProfesorRepository : BaseRepository, IProfesorRepository
         await using var cn = new SqlConnection(_cs);
         await cn.OpenAsync(ct);
 
-        await using var cmd = new SqlCommand("dbo.SP_Profesores_CRUD", cn)
+        await using var cmd = new SqlCommand("dbo.SpProfesores", cn)
         { CommandType = CommandType.StoredProcedure };
         cmd.Parameters.AddWithValue("@Accion", "R");
 
@@ -59,7 +59,7 @@ internal sealed class ProfesorRepository : BaseRepository, IProfesorRepository
     {
         await using var cn = new SqlConnection(_cs);
         await cn.OpenAsync(ct);
-        await using var cmd = new SqlCommand("dbo.SP_Profesores_CRUD", cn)
+        await using var cmd = new SqlCommand("dbo.SpProfesores", cn)
         { CommandType = CommandType.StoredProcedure };
         cmd.Parameters.AddWithValue("@Accion", "B");
         cmd.Parameters.AddWithValue("@IdProfesor", id);

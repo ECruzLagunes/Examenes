@@ -12,7 +12,7 @@ internal sealed class AsignacionRepository : BaseRepository, IAsignacionReposito
     public AsignacionRepository(IConfiguration cfg) : base(cfg) { }
 
     public Task<OperationResult> AsignarAsync(int aId, int pId, CancellationToken ct)
-        => ExecCrudAsync("dbo.SP_Asignaciones_CRUD", cmd =>
+        => ExecCrudAsync("dbo.SpAsignaciones", cmd =>
         {
             cmd.Parameters.AddWithValue("@Accion", "A");
             cmd.Parameters.AddWithValue("@IdAlumno", aId);
@@ -20,7 +20,7 @@ internal sealed class AsignacionRepository : BaseRepository, IAsignacionReposito
         }, ct);
 
     public Task<OperationResult> DesasignarAsync(int aId, int pId, CancellationToken ct)
-        => ExecCrudAsync("dbo.SP_Asignaciones_CRUD", cmd =>
+        => ExecCrudAsync("dbo.SpAsignaciones", cmd =>
         {
             cmd.Parameters.AddWithValue("@Accion", "D");
             cmd.Parameters.AddWithValue("@IdAlumno", aId);
@@ -33,7 +33,7 @@ internal sealed class AsignacionRepository : BaseRepository, IAsignacionReposito
         await using var cn = new SqlConnection(_cs);
         await cn.OpenAsync(ct);
 
-        await using var cmd = new SqlCommand("dbo.SP_Asignaciones_CRUD", cn)
+        await using var cmd = new SqlCommand("dbo.SpAsignaciones", cn)
         { CommandType = CommandType.StoredProcedure };
         cmd.Parameters.AddWithValue("@Accion", "P");
         cmd.Parameters.AddWithValue("@IdProfesor", pId);

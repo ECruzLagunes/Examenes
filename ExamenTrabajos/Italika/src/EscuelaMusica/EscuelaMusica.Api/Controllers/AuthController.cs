@@ -20,7 +20,8 @@ public sealed class AuthController : ControllerBase
     [AllowAnonymous]
     public ActionResult Login([FromBody] LoginDto dto)
     {
-        if (dto.User != "admin" || dto.Password != "123456") return Unauthorized();
+        if (dto.User != "admin" || dto.Password != "123456") 
+            return Unauthorized();
 
         var claims = new[]
         {

@@ -12,7 +12,7 @@ internal sealed class AlumnoRepository : BaseRepository, IAlumnoRepository
     public AlumnoRepository(IConfiguration cfg) : base(cfg) { }
 
     public Task<OperationResult> InsertarAsync(Alumno a, CancellationToken ct)
-        => ExecCrudAsync("dbo.SP_Alumnos_CRUD", cmd =>
+        => ExecCrudAsync("dbo.SpAlumnos", cmd =>
         {
             cmd.Parameters.AddWithValue("@Accion", "I");
             cmd.Parameters.AddWithValue("@CodigoAlumno", a.CodigoAlumno);
@@ -23,7 +23,7 @@ internal sealed class AlumnoRepository : BaseRepository, IAlumnoRepository
         }, ct);
 
     public Task<OperationResult> ActualizarAsync(Alumno a, CancellationToken ct)
-        => ExecCrudAsync("dbo.SP_Alumnos_CRUD", cmd =>
+        => ExecCrudAsync("dbo.SpAlumnos", cmd =>
         {
             cmd.Parameters.AddWithValue("@Accion", "U");
             cmd.Parameters.AddWithValue("@IdAlumno", a.IdAlumno);
@@ -34,7 +34,7 @@ internal sealed class AlumnoRepository : BaseRepository, IAlumnoRepository
         }, ct);
 
     public Task<OperationResult> EliminarAsync(int id, CancellationToken ct)
-        => ExecCrudAsync("dbo.SP_Alumnos_CRUD", cmd =>
+        => ExecCrudAsync("dbo.SpAlumnos", cmd =>
         {
             cmd.Parameters.AddWithValue("@Accion", "D");
             cmd.Parameters.AddWithValue("@IdAlumno", id);
@@ -46,7 +46,7 @@ internal sealed class AlumnoRepository : BaseRepository, IAlumnoRepository
         await using var cn = new SqlConnection(_cs);
         await cn.OpenAsync(ct);
 
-        await using var cmd = new SqlCommand("dbo.SP_Alumnos_CRUD", cn)
+        await using var cmd = new SqlCommand("dbo.SpAlumnos", cn)
         { CommandType = CommandType.StoredProcedure };
         cmd.Parameters.AddWithValue("@Accion", "R");
 
@@ -59,7 +59,7 @@ internal sealed class AlumnoRepository : BaseRepository, IAlumnoRepository
     {
         await using var cn = new SqlConnection(_cs);
         await cn.OpenAsync(ct);
-        await using var cmd = new SqlCommand("dbo.SP_Alumnos_CRUD", cn)
+        await using var cmd = new SqlCommand("dbo.SpAlumnos", cn)
         { CommandType = CommandType.StoredProcedure };
         cmd.Parameters.AddWithValue("@Accion", "B");
         cmd.Parameters.AddWithValue("@IdAlumno", id);
