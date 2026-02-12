@@ -67,11 +67,15 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Always enable Swagger UI and serve it at the application root so
+// opening the app will show the Swagger page for testing the services.
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "EscuelaMusica API v1");
+    // Serve the Swagger UI at application root (i.e. '/'), so no manual redirect is needed.
+    c.RoutePrefix = string.Empty;
+});
 
 app.UseAuthentication();   
 app.UseAuthorization();
