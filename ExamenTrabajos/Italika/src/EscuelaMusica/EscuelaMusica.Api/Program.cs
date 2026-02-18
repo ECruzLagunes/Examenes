@@ -1,4 +1,6 @@
 ﻿using EscuelaMusica.Api.Auth;
+using Serilog;
+using Serilog.Events;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -7,6 +9,27 @@ using EscuelaMusica.Infrastructure;
 using EscuelaMusica.Application;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog from appsettings and allow overriding file path via "LoggingFile:Path"
+var loggerConfig = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext();
+
+var filePath = builder.Configuration["LoggingFile:Path"];
+if (!string.IsNullOrWhiteSpace(filePath))
+{
+    // Ensure daily rolling file sink uses the configured path
+    loggerConfig = loggerConfig.WriteTo.File(
+        path: filePath,
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+        retainedFileCountLimit: 31,
+        shared: true);
+}
+
+Log.Logger = loggerConfig.CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.Configure<JwtOptions>(
     builder.Configuration.GetSection(JwtOptions.SectionName));
@@ -77,8 +100,21 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 
-app.UseAuthentication();   
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.Run();
+
+try
+{
+    Log.Information("Starting web host");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

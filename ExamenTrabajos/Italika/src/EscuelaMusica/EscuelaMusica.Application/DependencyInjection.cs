@@ -13,6 +13,8 @@ namespace EscuelaMusica.Application
             svcs.AddScoped<IAlumnoService, AlumnoService>();
             svcs.AddScoped<IAsignacionService, AsignacionService>();
 
+            // ILogger<T> will be provided by the host; no explicit registration needed.
+
             return svcs;
         }
     }

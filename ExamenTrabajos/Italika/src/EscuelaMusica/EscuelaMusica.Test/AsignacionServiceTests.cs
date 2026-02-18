@@ -2,15 +2,17 @@
 using EscuelaMusica.Domain.Common;
 using EscuelaMusica.Domain.Contracts;
 using Moq;
+using Microsoft.Extensions.Logging;
 
 namespace EscuelaMusica.Application.Tests.Services;
 
 public class AsignacionServiceTests
 {
     private readonly Mock<IAsignacionRepository> _repo = new();
+    private readonly Mock<ILogger<AsignacionService>> _logger = new();
     private readonly IAsignacionService _svc;
 
-    public AsignacionServiceTests() => _svc = new AsignacionService(_repo.Object);
+    public AsignacionServiceTests() => _svc = new AsignacionService(_repo.Object, _logger.Object);
 
     [Fact]
     public async Task AsignarAsync_Ok()
